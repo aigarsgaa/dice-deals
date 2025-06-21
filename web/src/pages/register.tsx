@@ -19,8 +19,12 @@ export default function Register() {
     try {
       await emailSignUp(email, password);
       router.push("/");
-    } catch (err: any) {
+    } catch (err: unknown) {
+      if (err instanceof Error) {
       setError(err.message);
+    } else {
+      setError("An unexpected error occurred");
+    }
     }
   };
 
