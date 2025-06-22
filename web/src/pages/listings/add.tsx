@@ -168,7 +168,10 @@ export default function AddListingPage() {
             }}
           />
           {preview && (
-            <img src={preview} alt="preview" className="mt-2 w-32 h-32 object-cover rounded" />
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={preview} alt="preview" className="mt-2 w-32 h-32 object-cover rounded" />
+            </>
           )}
         </div>
         <div>
