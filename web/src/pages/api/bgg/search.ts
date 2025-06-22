@@ -17,10 +17,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const url = `https://api.geekdo.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=boardgame`;
     const xml = await (await fetch(url)).text();
     const json = await parseStringPromise(xml, { explicitArray: false, mergeAttrs: true });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const raw = json.items?.item ?? [];
     // ensure only base games (exclude expansions)
-    const filtered = Array.isArray(raw) ? raw.filter((it: any) => it.type === "boardgame") : [raw].filter((it: any) => it.type === "boardgame");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const filtered = Array.isArray(raw)
+      ? raw.filter((it: any) => it.type === "boardgame")
+      : [raw].filter((it: any) => it.type === "boardgame");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const items = filtered.map((it: any) => ({
       id: Number(it.id),
