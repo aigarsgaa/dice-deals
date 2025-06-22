@@ -13,6 +13,7 @@ interface Listing extends DocumentData {
 export default function ListingsPage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     const fetchListings = async () => {
@@ -28,17 +29,28 @@ export default function ListingsPage() {
 
   return (
     <div className="max-w-3xl mx-auto p-4">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <h1 className="text-2xl font-bold">Listings</h1>
-        <Link href="/listings/add" className="bg-blue-600 text-white px-3 py-1 rounded">
-          Add Listing
-        </Link>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <input
+            type="text"
+            placeholder="Search title…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="flex-1 border rounded px-2 py-1 text-sm"
+          />
+          <Link href="/listings/add" className="bg-blue-600 text-white px-3 py-1 rounded whitespace-nowrap">
+            Add Listing
+          </Link>
+        </div>
       </div>
       {listings.length === 0 ? (
         <p>No listings yet.</p>
       ) : (
         <ul className="space-y-3">
-          {listings.map((l) => (
+          {listings
+            .filter((l) => l.title.toLowerCase().includes(query.toLowerCase()))
+            .map((l) => (
             <li key={l.id} className="border rounded p-3 hover:bg-gray-50">
                 <Link href={`/listings/${l.id}`}>
               <div className="flex justify-between">
