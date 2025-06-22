@@ -5,8 +5,27 @@ import Head from "next/head";
 import Image from "next/image";
 import { db } from "@/lib/firebase";
 
+interface Listing {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  condition: string;
+  bggId?: number;
+}
+
+interface BggThing {
+  id: number;
+  name: string;
+  image?: string;
+  minPlayers?: number;
+  maxPlayers?: number;
+  playingTime?: number;
+  weight?: number;
+}
+
 interface Props {
-  listing: any | null;
+  listing: Listing;
 }
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
@@ -15,13 +34,13 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   if (!snap.exists()) {
     return { notFound: true };
   }
-  const listing = { id: snap.id, ...snap.data() };
+  const listing = { id: snap.id, ...(snap.data() as Omit<Listing, "id">) } as Listing;
   return { props: { listing } };
 };
 
 export default function ListingDetail({ listing }: Props) {
   // lazy-load BGG details client-side for freshness
-  const [bgg, setBgg] = React.useState<any | null>(null);
+  const [bgg, setBgg] = React.useState<BggThing | null>(null);
   React.useEffect(() => {
     if (listing?.bggId) {
       fetch(`/api/bgg/thing?id=${listing.bggId}`)
@@ -47,7 +66,7 @@ export default function ListingDetail({ listing }: Props) {
         <div className="mt-4 text-sm">
           <p>
             Players: {bgg.minPlayers}–{bgg.maxPlayers} • {bgg.playingTime} min •
-            Weight {bgg.weight.toFixed(1)}
+            Weight {bgg.weight !== undefined ? bgg.weight.toFixed(1) : "-"}
           </p>
           <a
             href={`https://boardgamegeek.com/boardgame/${bgg.id}`}
