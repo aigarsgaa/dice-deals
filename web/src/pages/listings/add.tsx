@@ -11,8 +11,13 @@ interface ListingFormState {
   price: string;
   condition: string;
   externalUrl: string;
+  deliveryPickup: boolean;
+  deliveryParcel: boolean;
   bggId?: number;
   version?: string;
+  minPlayers?: number;
+  maxPlayers?: number;
+  playingTime?: number;
 }
 
 const initialState: ListingFormState = {
@@ -21,6 +26,8 @@ const initialState: ListingFormState = {
   price: "",
   condition: "new",
   externalUrl: "",
+  deliveryPickup: true,
+  deliveryParcel: false,
 };
 
 export default function AddListingPage() {
@@ -28,12 +35,15 @@ export default function AddListingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [gameVersions, setGameVersions] = useState<string[]>([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [gameStats, setGameStats] = useState<{ minPlayers?: number; maxPlayers?: number; playingTime?: number }>({});
   const [preview, setPreview] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type, checked } = e.target as HTMLInputElement;
+    setForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,6 +53,11 @@ export default function AddListingPage() {
       const docRef = await addDoc(collection(db, "listings"), {
         ...form,
         price: parseFloat(form.price),
+        deliveryPickup: form.deliveryPickup,
+        deliveryParcel: form.deliveryParcel,
+        minPlayers: gameStats.minPlayers,
+        maxPlayers: gameStats.maxPlayers,
+        playingTime: gameStats.playingTime,
         createdAt: Timestamp.now(),
       });
       if (imageFile) {
@@ -75,7 +90,11 @@ export default function AddListingPage() {
                 if (res.ok) {
                   const data = await res.json();
                   const versions: string[] = data.versions ?? [];
-                  setForm((prev) => ({
+                  setGameStats({
+                    minPlayers: data.minPlayers,
+                    maxPlayers: data.maxPlayers,
+                    playingTime: data.playingTime,
+                  });                  setForm((prev) => ({
                     ...prev,
                     title: data.name ?? g.name,
                     description: data.description ?? "",
@@ -183,6 +202,26 @@ export default function AddListingPage() {
             placeholder="https://example.com/item"
             className="w-full border rounded p-2"
           />
+        </div>
+        <div className="flex gap-6">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              name="deliveryPickup"
+              checked={form.deliveryPickup}
+              onChange={handleChange}
+            />
+            Local pickup
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              name="deliveryParcel"
+              checked={form.deliveryParcel}
+              onChange={handleChange}
+            />
+            Parcel machine
+          </label>
         </div>
         <button
           type="submit"
