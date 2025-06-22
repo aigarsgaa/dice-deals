@@ -2,6 +2,16 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+### Environment variables
+
+1. Copy `env.example` to `.env.local` in the `web/` folder:
+   ```bash
+   cp env.example .env.local
+   ```
+2. Replace the placeholder values with your own Firebase project keys (found in Firebase → Project settings → Web SDK configuration).
+
+---
+
 First, run the development server:
 
 ```bash

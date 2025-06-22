@@ -16,9 +16,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const xml = await (await fetch(url)).text();
     const json = await parseStringPromise(xml, { explicitArray: false, mergeAttrs: true });
     const item = json.items.item;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const names = Array.isArray(item.name) ? item.name : [item.name];
+    const primary = names.find((n: any) => n.type === "primary") || names[0];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const alternates = names.filter((n: any) => n.type !== "primary").map((n:any)=>n.value);
     const data = {
       id: Number(item.id),
-      name: typeof item.name === "string" ? item.name : item.name?.value,
+      name: typeof primary === "string" ? primary : primary?.value,
+      versions: alternates,
       description: item.description,
       year: item.yearpublished?.value ? Number(item.yearpublished.value) : undefined,
       minPlayers: Number(item.minplayers?.value ?? 0),

@@ -14,9 +14,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (cached) return res.status(200).json(cached);
 
   try {
-    const url = `https://api.geekdo.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=boardgame,boardgameexpansion`;
+    const url = `https://api.geekdo.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=boardgame`;
     const xml = await (await fetch(url)).text();
     const json = await parseStringPromise(xml, { explicitArray: false, mergeAttrs: true });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const items = (json.items?.item ?? []).map((it: any) => ({
       id: Number(it.id),
       name: typeof it.name === "string" ? it.name : it.name?.value,
