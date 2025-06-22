@@ -11,6 +11,9 @@ export default function NavBar() {
       <div className="flex items-center gap-4">
         {user ? (
           <>
+            <Link href="/listings/add" className="text-sm hover:underline">
+              Add Listing
+            </Link>
             <span className="text-sm">{user.email}</span>
             <button
               className="text-sm text-red-600 hover:underline"
