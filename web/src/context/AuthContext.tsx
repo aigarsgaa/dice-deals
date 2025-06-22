@@ -10,6 +10,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from "firebase/auth";
+import { FirebaseError } from "firebase/app";
 
 interface AuthContextProps {
   user: User | null;
@@ -36,7 +37,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (err: unknown) {
+      if (err instanceof FirebaseError) {
+        if (err.code === "auth/account-exists-with-different-credential") {
+          alert(
+            "An account already exists with the same email but a different sign-in method. Please sign in with email & password first, then you can link Google from your account settings."
+          );
+          return;
+        }
+      }
+      throw err; // rethrow other errors so caller can display message
+    }
   };
 
   const emailSignUp = async (email: string, password: string) => {
