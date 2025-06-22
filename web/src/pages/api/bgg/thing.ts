@@ -16,11 +16,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const xml = await (await fetch(url)).text();
     const json = await parseStringPromise(xml, { explicitArray: false, mergeAttrs: true });
     const item = json.items.item;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const names = Array.isArray(item.name) ? item.name : [item.name];
-    const primary = names.find((n: any) => n.type === "primary") || names[0];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const alternates = names.filter((n: any) => n.type !== "primary").map((n:any)=>n.value);
+    type BGGName = { value: string; type: string };
+    const names: BGGName[] = Array.isArray(item.name) ? item.name : [item.name];
+    const primary = names.find((n) => n.type === "primary") || names[0];
+    const alternates = names.filter((n) => n.type !== "primary").map((n) => n.value);
     const data = {
       id: Number(item.id),
       name: typeof primary === "string" ? primary : primary?.value,

@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import BGGSearchInput from "@/components/BGGSearchInput";
 
 interface ListingFormState {
   title: string;
@@ -9,6 +10,7 @@ interface ListingFormState {
   price: string;
   condition: string;
   externalUrl: string;
+  bggId?: number;
 }
 
 const initialState: ListingFormState = {
@@ -51,6 +53,28 @@ export default function AddListingPage() {
     <div className="max-w-2xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Add Listing</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block mb-1 font-medium">Search Game</label>
+          <BGGSearchInput
+            onSelect={async (g) => {
+              // fetch details
+              try {
+                const res = await fetch(`/api/bgg/thing?id=${g.id}`);
+                if (res.ok) {
+                  const data = await res.json();
+                  setForm((prev) => ({
+                    ...prev,
+                    title: data.name ?? g.name,
+                    description: data.description ?? "",
+                    bggId: g.id,
+                  }));
+                }
+              } catch (err) {
+                console.error("thing fetch failed", err);
+              }
+            }}
+          />
+        </div>
         <div>
           <label className="block mb-1 font-medium">Title</label>
           <input

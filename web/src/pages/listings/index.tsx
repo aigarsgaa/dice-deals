@@ -39,11 +39,13 @@ export default function ListingsPage() {
       ) : (
         <ul className="space-y-3">
           {listings.map((l) => (
-            <li key={l.id} className="border rounded p-3">
+            <li key={l.id} className="border rounded p-3 hover:bg-gray-50">
+                <Link href={`/listings/${l.id}`}>
               <div className="flex justify-between">
                 <span className="font-medium">{l.title}</span>
                 <span>€{l.price.toFixed(2)}</span>
               </div>
+            </Link>
             </li>
           ))}
         </ul>
