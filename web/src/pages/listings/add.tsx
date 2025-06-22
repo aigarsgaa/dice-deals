@@ -4,6 +4,7 @@ import { collection, addDoc, Timestamp, doc, updateDoc } from "firebase/firestor
 import { db, storage } from "@/lib/firebase";
 import BGGSearchInput from "@/components/BGGSearchInput";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { useAuth } from "@/context/AuthContext";
 
 interface ListingFormState {
   title: string;
@@ -38,6 +39,7 @@ export default function AddListingPage() {
   const [gameStats, setGameStats] = useState<{ minPlayers?: number; maxPlayers?: number; playingTime?: number }>({});
   const [preview, setPreview] = useState<string | null>(null);
   const router = useRouter();
+  const { user } = useAuth();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -52,6 +54,7 @@ export default function AddListingPage() {
     try {
       const docRef = await addDoc(collection(db, "listings"), {
         ...form,
+        ownerUid: user?.uid,
         price: parseFloat(form.price),
         deliveryPickup: form.deliveryPickup,
         deliveryParcel: form.deliveryParcel,
