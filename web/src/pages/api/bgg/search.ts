@@ -18,7 +18,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const xml = await (await fetch(url)).text();
     const json = await parseStringPromise(xml, { explicitArray: false, mergeAttrs: true });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const items = (json.items?.item ?? []).map((it: any) => ({
+    const raw = json.items?.item ?? [];
+    // ensure only base games (exclude expansions)
+    const filtered = Array.isArray(raw) ? raw.filter((it: any) => it.type === "boardgame") : [raw].filter((it: any) => it.type === "boardgame");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const items = filtered.map((it: any) => ({
       id: Number(it.id),
       name: typeof it.name === "string" ? it.name : it.name?.value,
       year: it.yearpublished?.value ? Number(it.yearpublished.value) : undefined,

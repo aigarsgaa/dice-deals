@@ -12,6 +12,7 @@ interface ListingFormState {
   condition: string;
   externalUrl: string;
   bggId?: number;
+  version?: string;
 }
 
 const initialState: ListingFormState = {
@@ -25,6 +26,7 @@ const initialState: ListingFormState = {
 export default function AddListingPage() {
   const [form, setForm] = useState<ListingFormState>(initialState);
   const [submitting, setSubmitting] = useState(false);
+  const [gameVersions, setGameVersions] = useState<string[]>([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const router = useRouter();
@@ -72,12 +74,15 @@ export default function AddListingPage() {
                 const res = await fetch(`/api/bgg/thing?id=${g.id}`);
                 if (res.ok) {
                   const data = await res.json();
+                  const versions: string[] = data.versions ?? [];
                   setForm((prev) => ({
                     ...prev,
                     title: data.name ?? g.name,
                     description: data.description ?? "",
                     bggId: g.id,
+                    version: versions[0] ?? "base", // default
                   }));
+                  setGameVersions(versions);
                 }
               } catch (err) {
                 console.error("thing fetch failed", err);
@@ -95,6 +100,23 @@ export default function AddListingPage() {
             className="w-full border rounded p-2"
           />
         </div>
+        {gameVersions.length > 0 && (
+          <div>
+            <label className="block mb-1 font-medium">Version</label>
+            <select
+              name="version"
+              value={form.version}
+              onChange={handleChange}
+              className="w-full border rounded p-2"
+            >
+              {gameVersions.map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         <div>
           <label className="block mb-1 font-medium">Description</label>
           <textarea
