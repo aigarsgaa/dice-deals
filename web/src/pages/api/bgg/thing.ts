@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { parseStringPromise } from "xml2js";
 import { SimpleCache } from "@/lib/simpleCache";
 
-const cache = new SimpleCache<any>(60 * 60 * 1000);
+const cache = new SimpleCache(60 * 60 * 1000);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const id = String(req.query.id || "");
