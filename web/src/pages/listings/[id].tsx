@@ -11,6 +11,7 @@ interface Listing {
   description: string;
   price: number;
   condition: string;
+  image?: string;
   bggId?: number;
 }
 
@@ -56,7 +57,10 @@ export default function ListingDetail({ listing }: Props) {
         <title>{listing.title} – Dice Deals</title>
       </Head>
       <h1 className="text-2xl font-bold mb-4">{listing.title}</h1>
-      {bgg?.image && (
+      {listing.image && (
+        <Image src={listing.image} alt={listing.title} width={400} height={400} />
+      )}
+      {!listing.image && bgg?.image && (
         <Image src={bgg.image} alt={listing.title} width={400} height={400} />
       )}
       <p className="mt-2 whitespace-pre-wrap text-sm text-gray-700">

@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
-import { collection, addDoc, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { collection, addDoc, Timestamp, doc, updateDoc } from "firebase/firestore";
+import { db, storage } from "@/lib/firebase";
 import BGGSearchInput from "@/components/BGGSearchInput";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 interface ListingFormState {
   title: string;
@@ -24,6 +25,8 @@ const initialState: ListingFormState = {
 export default function AddListingPage() {
   const [form, setForm] = useState<ListingFormState>(initialState);
   const [submitting, setSubmitting] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -35,11 +38,18 @@ export default function AddListingPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await addDoc(collection(db, "listings"), {
+      const docRef = await addDoc(collection(db, "listings"), {
         ...form,
         price: parseFloat(form.price),
         createdAt: Timestamp.now(),
       });
+      if (imageFile) {
+        const path = `listings/${docRef.id}/${imageFile.name}`;
+        const storageRef = ref(storage, path);
+        await uploadBytes(storageRef, imageFile);
+        const url = await getDownloadURL(storageRef);
+        await updateDoc(doc(db, "listings", docRef.id), { image: url });
+      }
       router.push("/");
     } catch (err) {
       console.error("Failed to add listing", err);
@@ -123,6 +133,21 @@ export default function AddListingPage() {
               <option value="damaged">Damaged</option>
             </select>
           </div>
+        </div>
+        <div>
+          <label className="block mb-1 font-medium">Photo (optional)</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const f = e.target.files?.[0] || null;
+              setImageFile(f || null);
+              setPreview(f ? URL.createObjectURL(f) : null);
+            }}
+          />
+          {preview && (
+            <img src={preview} alt="preview" className="mt-2 w-32 h-32 object-cover rounded" />
+          )}
         </div>
         <div>
           <label className="block mb-1 font-medium">External URL (optional)</label>
