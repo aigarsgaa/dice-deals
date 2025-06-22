@@ -4,6 +4,8 @@ interface BGGSearchResult {
   id: number;
   name: string;
   year?: number;
+  image?: string;
+  rank?: number;
 }
 
 interface Props {
@@ -52,7 +54,7 @@ export default function BGGSearchInput({ onSelect }: Props) {
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search BoardGameGeek..."
+        placeholder="enter board game name"
         className="w-full border rounded p-2"
       />
       {loading && <div className="absolute right-2 top-2 text-sm">…</div>}
@@ -61,14 +63,25 @@ export default function BGGSearchInput({ onSelect }: Props) {
           {results.map((r) => (
             <li
               key={r.id}
-              className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+              className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
               onClick={() => {
                 onSelect(r);
                 setQuery(r.name);
                 setResults([]);
               }}
             >
-              {r.name} {r.year && <span className="text-gray-500">({r.year})</span>}
+              {r.image && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={r.image} alt="thumb" className="w-10 h-10 object-cover rounded" />
+              )}
+              <div className="flex flex-col">
+                <span>
+                  {r.name} {r.year && <span className="text-gray-500">({r.year})</span>}
+                </span>
+                {r.rank && r.rank !== 999999 && (
+                  <span className="text-xs text-gray-500">Rank: {r.rank}</span>
+                )}
+              </div>
             </li>
           ))}
         </ul>
